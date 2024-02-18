@@ -1,0 +1,102 @@
+/* --------------CAPA DE NEGOCIO---------------- */
+
+import CartSchema from "../models/cart.schema.js";
+import ProductSchema from "../models/product.schema.js";
+
+class CartsManager {
+  getCarts = async () => {
+    try {
+      let colectionJSON = await CartSchema.find();
+      return colectionJSON;
+    } catch (error) {
+      throw new Error(`Hubo un error obteniendo los carritos: ${error.message}`);
+    }
+  };
+
+  addCart = async () => {
+    try {
+      await ProductSchema.insertMany({ products: [] });
+    } catch (error) {
+      throw new Error(`Error al agregar producto: ${error.message}`);
+    }
+  };
+
+  getCartById = async (cartId) => {
+    try {
+      return await CartSchema.findById(cartId).populate({
+        path: "products.product",
+        model: "Products",
+      });
+    } catch (error) {
+      throw new Error(`Error al encontrar el carrito`);
+    }
+  };
+
+  updateCart = async (cartId, productId) => {
+    try {
+      await CartSchema.findById(cartId);
+    } catch (error) {
+      throw new Error(`No se encontró el carrito a actualizar`);
+    }
+    try {
+      await ProductSchema.findById(productId);
+    } catch (error) {
+      throw new Error(`No se encontró el producto a agregar`);
+    }
+    try {
+      const update = await CartSchema.findOneAndUpdate(
+        { _id: cartId, "products.product": productId },
+        { $inc: { "products.$.quantity": 1 } },
+        { new: true } // Devuelve el documento actualizado
+      );
+
+      if (!update) {
+        // Si el producto no está en el carrito, lo agrega
+        await CartSchema.findByIdAndUpdate(cartId, {
+          $push: { products: { product: productId, quantity: 1 } },
+        });
+      }
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  updateProductsCart = async (cartId, productId, amount) => {
+    try {
+      console.log(amount);
+      await CartSchema.findOneAndUpdate(
+        { _id: cartId, "products.product": productId },
+        { $set: { "products.$.quantity": amount.quantity } },
+        { new: true }
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  deleteProduct = async (cartId, productId) => {
+    try {
+      const cart = await CartSchema.findById(cartId);
+      if (!cart) {
+        throw new Error(`No se encontró el carrito a actualizar`);
+      } else {
+        cart.products = cart.products.filter(
+          (product) => product.product.toString() !== productId
+        );
+        await cart.save();
+      }
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  cleanCartById = async (cartId) => {
+    try {
+      await CartSchema.updateOne({ _id: cartId }, { $set: { products: [] } });
+    } catch (error) {
+      throw new Error(`Error al eliminar los productos del carrito`);
+    }
+  };
+}
+
+export default CartsManager;
