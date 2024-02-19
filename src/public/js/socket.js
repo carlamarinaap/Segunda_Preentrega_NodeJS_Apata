@@ -5,26 +5,25 @@ const productList = document.getElementById("productList");
 const addProd = document.getElementById("addProd");
 const errorBox = document.getElementById("errorBox");
 
-const deleteProd = (prod) => {
-  Swal.fire({
-    title: "Estas seguro que querés eliminar este producto?",
-    showCancelButton: true,
-    confirmButtonColor: "#198754",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Si, eliminalo!",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      socket.emit("deleteProduct", prod);
-      Swal.fire({
-        title: "Eliminado!",
-        text: "El producto fue eliminado con éxito",
-        icon: "success",
-      }).then(() => {
-        window.location.reload();
-      });
-    }
-  });
-};
+// const deleteProd = (prod) => {
+//   Swal.fire({
+//     title: "Estas seguro que querés eliminar este producto?",
+//     showCancelButton: true,
+//     confirmButtonColor: "#198754",
+//     cancelButtonColor: "#d33",
+//     confirmButtonText: "Si, eliminalo!",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       socket.emit("deleteProduct", prod);
+//       Swal.fire({
+//         title: "Eliminado!",
+//         text: "El producto fue eliminado con éxito",
+//         icon: "success",
+//       }).then(() => {
+//       });
+//     }
+//   });
+// };
 
 addProd.addEventListener("click", (e) => {
   e.preventDefault();
@@ -40,25 +39,23 @@ addProd.addEventListener("click", (e) => {
   } else {
     const newProduct = { title, description, price, code, stock, category };
 
-    window.location.reload();
-
     socket.emit("newProduct", newProduct);
-    window.location.reload();
   }
 });
 
 socket.on("card", (data) => {
-  const allCArds = data.map((prod) => {
+  const allCArds = data.docs.map((prod) => {
     return `
     <div class="card m-1 bg-light" style="width: 18rem;">
       <div class="card-body">
         <h5 class="card-title">${prod.title}</h5>
         <p class="card-text">${prod.description}</p>
         <p class="card-text">$ ${prod.price}</p>
-        <button onclick="deleteProd('${this.id}')" class="btn btn-danger">Eliminar</button>
+        <button disabled onclick="deleteProd('${this.id}')" class="btn btn-danger">Eliminar</button>
       </div>
     </div>
     `;
   });
+
   productList.innerHTML = allCArds.join("");
 });

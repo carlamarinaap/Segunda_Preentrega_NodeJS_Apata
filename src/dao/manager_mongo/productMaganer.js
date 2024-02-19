@@ -3,9 +3,40 @@
 import ProductSchema from "../models/product.schema.js";
 
 class ProductManager {
-  getProducts = async () => {
+  getProducts = async (limit = 10, page = 1, sort, category, stock) => {
     try {
-      return await ProductSchema.find();
+      let query = {};
+      if (category && stock) {
+        query = { $and: [{ category: category }, { stock: { $gt: 0 } }] };
+      } else if (category) {
+        query = { category: category };
+      } else if (stock) {
+        query = { stock: { $gt: 0 } };
+      }
+
+      let sortQuery = {};
+      if (sort === "asc" || sort === "desc") {
+        sortQuery = { price: sort === "asc" ? 1 : -1 };
+      }
+
+      const result = await ProductSchema.paginate(query, {
+        limit: limit,
+        page: page,
+        lean: true,
+        sort: sortQuery,
+      });
+
+      result.prevLink = result.hasPrevPage
+        ? `http://localhost:8080/api/products?page=${result.prevPage}`
+        : null;
+      result.nextLink = result.hasNextPage
+        ? `http://localhost:8080/api/products?page=${result.nextPage}`
+        : null;
+      result.status = "success";
+      result.payload = result.docs;
+      delete result.docs;
+      delete result.pagingCounter;
+      return result;
     } catch (error) {
       throw new Error(`Hubo un error obteniendo los productos: ${error.message}`);
     }

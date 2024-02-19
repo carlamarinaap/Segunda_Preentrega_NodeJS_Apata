@@ -48,12 +48,8 @@ socketServer.on("connection", (socket) => {
   socket.on("newProduct", async (data) => {
     await pm.addProduct(data);
     const products = await pm.getProducts();
-    socketServer.emit("card", products);
-  });
-  socket.on("deleteProduct", async (data) => {
-    await pm.deleteProduct(data);
-    const products = await pm.getProducts();
-    socketServer.emit("card", products);
+    const allProducts = await pm.getProducts(products.totalDocs);
+    socketServer.emit("card", allProducts);
   });
 
   socket.on("login", async (data) => {
@@ -71,4 +67,10 @@ socketServer.on("connection", (socket) => {
     const messages = await mm.getMessages();
     socketServer.emit("chat", messages);
   });
+
+  // socket.on("deleteProduct", async (data) => {
+  //   await pm.deleteProduct(data);
+  //   const products = await pm.getProducts();
+  //   socketServer.emit("card", products);
+  // });
 });

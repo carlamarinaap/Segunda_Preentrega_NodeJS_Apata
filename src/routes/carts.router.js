@@ -4,15 +4,6 @@ import CartsManager from "../dao/manager_mongo/cartsMaganer.js";
 const router = express.Router();
 const cm = new CartsManager();
 
-//----------------------//
-//----------------------//
-//----------------------//
-// FALTA HACER UN PUT   //
-//----------------------//
-//----------------------//
-//----------------------//
-//----------------------//
-
 router.get("/", async (req, res) => {
   try {
     const carts = await cm.getCarts();
@@ -74,10 +65,13 @@ router.delete("/:cid/products/:pid", async (req, res) => {
 });
 
 router.put("/:cid", async (req, res) => {
-  // deberá actualizar el carrito con un arreglo de productos con el formato especificado arriba.
   try {
     const cartId = req.params.cid;
-  } catch (error) {}
+    await cm.getCartById(cartId);
+    // Acá falta lo que hay que devolver… el res.send() pero no entiendo que hay que devolver
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
 router.put("/:cid/products/:pid", async (req, res) => {

@@ -1,14 +1,18 @@
 import express from "express";
 import ProductManager from "../dao/manager_mongo/productMaganer.js";
 import MessageManager from "../dao/manager_mongo/messageManager.js";
+import CartsManager from "../dao/manager_mongo/cartsMaganer.js";
 
 const router = express.Router();
 const pm = new ProductManager();
 const mm = new MessageManager();
+const cm = new CartsManager();
 
 router.get("/", async (req, res) => {
   const products = await pm.getProducts();
-  res.render("home", { products });
+  const allProducts = await pm.getProducts(products.totalDocs);
+  console.log(allProducts);
+  res.render("home", { allProducts });
 });
 
 router.get("/socket", (req, res) => {
@@ -17,7 +21,8 @@ router.get("/socket", (req, res) => {
 
 router.get("/realTimeProducts", async (req, res) => {
   const products = await pm.getProducts();
-  res.render("realTimeProducts", { products });
+  const allProducts = await pm.getProducts(products.totalDocs);
+  res.render("realTimeProducts", { allProducts });
 });
 
 router.get("/chat", async (req, res) => {
@@ -25,22 +30,29 @@ router.get("/chat", async (req, res) => {
   res.render("chat", { messages });
 });
 
-router.get("cart/:cid", async (req, res) => {
-  cartId = req.params.cid;
-  const products = await pm.getProducts();
-  res.render("inCart", { products, cartId });
+router.get("/carts/:cid", async (req, res) => {
+  let cartId = req.params.cid;
+  const cart = await cm.getCartById(cartId);
+  const cartStringify = JSON.stringify(cart);
+  const cartJSON = JSON.parse(cartStringify);
+  cartJSON.products.forEach((prod) => {
+    prod.total = prod.quantity * prod.product.price;
+  });
+  res.render("inCart", { cartJSON });
 });
 
 router.get("/products", async (req, res) => {
-  /*
-Crear una vista en el router de views ‘/products’ para visualizar todos los productos con su respectiva paginación. Cada producto mostrado puede resolverse de dos formas:
-Llevar a una nueva vista con el producto seleccionado con su descripción completa, detalles de precio, categoría, etc. Además de un botón para agregar al carrito.
-Contar con el botón de “agregar al carrito” directamente, sin necesidad de abrir una página adicional con los detalles del producto.
-
-Además, agregar una vista en ‘/carts/:cid (cartId) para visualizar un carrito específico, donde se deberán listar SOLO los productos que pertenezcan a dicho carrito. 
- */
-  const products = await pm.getProducts();
-  res.render("products", { products });
+  let { limit, page, sort, filter } = req.query;
+  const products = await pm.getProducts(limit, page, sort, filter);
+  page ? page : (page = 1);
+  let isValid = page > 0 && page <= products.totalPages;
+  products.prevLink = products.hasPrevPage
+    ? `http://localhost:8080/products?page=${products.prevPage}`
+    : null;
+  products.nextLink = products.hasNextPage
+    ? `http://localhost:8080/products?page=${products.nextPage}`
+    : null;
+  res.render("products", { products, limit, page, isValid });
 });
 
 export default router;

@@ -15,9 +15,9 @@ class CartsManager {
 
   addCart = async () => {
     try {
-      await ProductSchema.insertMany({ products: [] });
+      return await CartSchema.insertMany({ products: [] });
     } catch (error) {
-      throw new Error(`Error al agregar producto: ${error.message}`);
+      throw new Error(`Error al crear el carrito: ${error.message}`);
     }
   };
 
