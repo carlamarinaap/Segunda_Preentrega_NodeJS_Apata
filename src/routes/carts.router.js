@@ -67,10 +67,11 @@ router.delete("/:cid/products/:pid", async (req, res) => {
 router.put("/:cid", async (req, res) => {
   try {
     const cartId = req.params.cid;
-    await cm.getCartById(cartId);
-    // Acá falta lo que hay que devolver… el res.send() pero no entiendo que hay que devolver
+    const allProducts = req.body;
+    await cm.updateProductsInCart(cartId, allProducts);
+    res.status(200).send("Carrito actualizado");
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send(`Error al actualizar el carrito: ${error.message}`);
   }
 });
 
@@ -78,8 +79,7 @@ router.put("/:cid/products/:pid", async (req, res) => {
   try {
     const cartId = req.params.cid;
     const productId = req.params.pid;
-
-    cm.updateProductsCart(cartId, productId, req.body);
+    cm.updateProductsQuantityInCart(cartId, productId, req.body);
     res.status(200).send("Cantidad de productos actualizados en el carrito");
   } catch (error) {
     res

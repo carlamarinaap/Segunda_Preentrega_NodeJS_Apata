@@ -1,13 +1,13 @@
 /* --------------CAPA DE NEGOCIO---------------- */
 
+import redactPasswords from "sails-postgresql/lib/private/redact-passwords.js";
 import CartSchema from "../models/cart.schema.js";
 import ProductSchema from "../models/product.schema.js";
 
 class CartsManager {
   getCarts = async () => {
     try {
-      let colectionJSON = await CartSchema.find();
-      return colectionJSON;
+      return await CartSchema.find();
     } catch (error) {
       throw new Error(`Hubo un error obteniendo los carritos: ${error.message}`);
     }
@@ -61,9 +61,8 @@ class CartsManager {
     }
   };
 
-  updateProductsCart = async (cartId, productId, amount) => {
+  updateProductsQuantityInCart = async (cartId, productId, amount) => {
     try {
-      console.log(amount);
       await CartSchema.findOneAndUpdate(
         { _id: cartId, "products.product": productId },
         { $set: { "products.$.quantity": amount.quantity } },
@@ -71,6 +70,16 @@ class CartsManager {
       );
     } catch (error) {
       throw new Error(error.message);
+    }
+  };
+
+  updateProductsInCart = async (cartId, allProducts) => {
+    try {
+      const cart = await CartSchema.findByIdAndUpdate(cartId, {
+        $set: { products: allProducts },
+      });
+    } catch (error) {
+      throw new Error(`Hubo un error actualizando el carrito:${error.message}`);
     }
   };
 

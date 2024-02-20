@@ -11,6 +11,7 @@ import routerProducts from "./routes/products.router.js";
 import routerCarts from "./routes/carts.router.js";
 import viewsRouter from "./routes/views.router.js";
 import __dirname from "./utils.js";
+import CartsManager from "./dao/manager_mongo/cartsMaganer.js";
 
 const app = express();
 const httpServer = app.listen(8080, () => console.log("Server running in port 8080"));
@@ -42,6 +43,7 @@ app.get("/ping", (req, res) => res.status(200).send("Pong!"));
 
 const pm = new ProductManager();
 const mm = new MessageManager();
+const cm = new CartsManager();
 socketServer.on("connection", (socket) => {
   console.log("Nuevo cliente conectado");
 
@@ -66,6 +68,14 @@ socketServer.on("connection", (socket) => {
     await mm.clearChat();
     const messages = await mm.getMessages();
     socketServer.emit("chat", messages);
+  });
+  socket.on("newCart", async () => {
+    let newCart = await cm.addCart();
+    socket.emit("purchases", newCart);
+  });
+
+  socket.on("newProductInCart", async ({ productId, newCart }) => {
+    await cm.updateCart(newCart[0]._id, productId);
   });
 
   // socket.on("deleteProduct", async (data) => {

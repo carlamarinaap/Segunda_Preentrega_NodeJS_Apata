@@ -5,26 +5,6 @@ const productList = document.getElementById("productList");
 const addProd = document.getElementById("addProd");
 const errorBox = document.getElementById("errorBox");
 
-// const deleteProd = (prod) => {
-//   Swal.fire({
-//     title: "Estas seguro que querés eliminar este producto?",
-//     showCancelButton: true,
-//     confirmButtonColor: "#198754",
-//     cancelButtonColor: "#d33",
-//     confirmButtonText: "Si, eliminalo!",
-//   }).then((result) => {
-//     if (result.isConfirmed) {
-//       socket.emit("deleteProduct", prod);
-//       Swal.fire({
-//         title: "Eliminado!",
-//         text: "El producto fue eliminado con éxito",
-//         icon: "success",
-//       }).then(() => {
-//       });
-//     }
-//   });
-// };
-
 addProd.addEventListener("click", (e) => {
   e.preventDefault();
   errorBox.innerText = "";
@@ -59,3 +39,23 @@ socket.on("card", (data) => {
 
   productList.innerHTML = allCArds.join("");
 });
+
+// const deleteProd = (prod) => {
+//   Swal.fire({
+//     title: "Estas seguro que querés eliminar este producto?",
+//     showCancelButton: true,
+//     confirmButtonColor: "#198754",
+//     cancelButtonColor: "#d33",
+//     confirmButtonText: "Si, eliminalo!",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       socket.emit("deleteProduct", prod);
+//       Swal.fire({
+//         title: "Eliminado!",
+//         text: "El producto fue eliminado con éxito",
+//         icon: "success",
+//       }).then(() => {
+//       });
+//     }
+//   });
+// };

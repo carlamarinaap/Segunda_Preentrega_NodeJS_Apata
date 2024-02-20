@@ -9,7 +9,7 @@
         <p class="card-text">$ {{this.price}}</p>
       </div>
       <div class=" m-2">
-        <button class="btn btn-primary">Agregar al carrito</button>
+        <button class="btn btn-primary" data-id="{{this.id}}" id="addProductInCart">Agregar al carrito</button>
       </div>
     </div>
 
@@ -42,5 +42,6 @@
 <p class="text-center">No hay productos para mostrar en página {{page}}</p>
 {{/if}}
 
-
-<script src="/js/index.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/socketUser.js"></script>
