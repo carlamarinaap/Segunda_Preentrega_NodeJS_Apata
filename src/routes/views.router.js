@@ -11,7 +11,6 @@ const cm = new CartsManager();
 router.get("/", async (req, res) => {
   const products = await pm.getProducts();
   const allProducts = await pm.getProducts(products.totalDocs);
-  console.log(allProducts);
   res.render("home", { allProducts });
 });
 

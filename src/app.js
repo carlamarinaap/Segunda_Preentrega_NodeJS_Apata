@@ -69,14 +69,6 @@ socketServer.on("connection", (socket) => {
     const messages = await mm.getMessages();
     socketServer.emit("chat", messages);
   });
-  socket.on("newCart", async () => {
-    let newCart = await cm.addCart();
-    socket.emit("purchases", newCart);
-  });
-
-  socket.on("newProductInCart", async ({ productId, newCart }) => {
-    await cm.updateCart(newCart[0]._id, productId);
-  });
 
   // socket.on("deleteProduct", async (data) => {
   //   await pm.deleteProduct(data);
